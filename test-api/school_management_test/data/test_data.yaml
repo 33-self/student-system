@@ -1,0 +1,141 @@
+# 注册接口测试数据
+register:
+  # 正向测试
+  positive:
+    - description: "6位工号+强密码"
+      username: "200001"
+      password: "Abc@123456"
+      expected_status: 200
+      expected_msg: "注册成功"
+    - description: "12位工号"
+      username: "200000000001"
+      password: "Abc@123456"
+      expected_status: 200
+    - description: "前导零工号"
+      username: "200002"
+      password: "Abc@123456"
+      expected_status: 200
+
+  # 无效工号（长度/格式）
+  invalid_username:
+    - description: "长度5位"
+      username: "12345"
+      password: "Abc@123456"
+      expected_status: 400
+      expected_msg_contains: "6-12"
+    - description: "长度13位"
+      username: "1234567890123"
+      password: "Abc@123456"
+      expected_status: 400
+      expected_msg_contains: "6-12"
+    - description: "包含字母"
+      username: "12345a"
+      password: "Abc@123456"
+      expected_status: 400
+      expected_msg_contains: "工号格式错误"
+    - description: "包含空格"
+      username: "123 456"
+      password: "Abc@123456"
+      expected_status: 400
+      expected_msg_contains: "工号格式错误"
+
+  # 密码复杂度
+  password_complexity:
+    - description: "长度7位"
+      password: "Abc@12"
+      expected_status: 400
+      expected_msg_contains: "长度"
+    - description: "缺少大写"
+      password: "abc@123456"
+      expected_status: 400
+      expected_msg_contains: "大写"
+    - description: "缺少小写"
+      password: "ABC@123456"
+      expected_status: 400
+      expected_msg_contains: "小写"
+    - description: "缺少数字"
+      password: "Abc@ABCDEF"
+      expected_status: 400
+      expected_msg_contains: "数字"
+    - description: "缺少特殊符号"
+      password: "Abc1234567"
+      expected_status: 400
+      expected_msg_contains: "特殊符号"
+    - description: "包含空格"
+      password: "Abc@ 12345"
+      expected_status: 400
+      expected_msg_contains: "空格"
+    - description: "合法密码（10位）"
+      password: "Abc@123456"
+      expected_status: 200
+
+  # 空字段
+  empty_fields:
+    - description: "用户名为空"
+      username: ""
+      password: "Abc@123456"
+      expected_status: 400
+      expected_msg_contains: "工号格式错误"
+    - description: "密码为空"
+      username: "200003"
+      password: ""
+      expected_status: 400
+      expected_msg_contains: "密码不能为空"
+
+  # 特殊场景
+  special:
+    - description: "SQL注入"
+      username: "' OR 1=1 --"
+      password: "Abc@123456"
+      expected_status: [400, 200]  # 接受200或400，但数据不能写入
+    - description: "重复工号"
+      repeat: true  # 需要先注册一次
+      username: "123456"
+      password: "Abc@123456"
+      expected_status: 400
+      expected_msg_contains: "工号已存在"
+
+# 登录接口测试数据
+login:
+  positive:
+    - description: "正常登录"
+      username: "200001"
+      password: "Abc@123456"
+      expected_status: 200
+      check_token: true
+
+  invalid:
+    - description: "用户不存在"
+      username: "999999"
+      password: "Abc@123456"
+      expected_status: 400
+      expected_msg_contains: ["用户不存在", "工号不存在"]
+    - description: "密码错误"
+      username: "200001"
+      password: "wrong"
+      expected_status: 400
+      expected_msg_contains: ["密码错误", "密码格式错误"]
+    - description: "账号禁用"
+      username: "200001"
+      password: "Abc@123456"
+      disabled: true
+      expected_status: 400
+      expected_msg_contains: "账号已被禁用"
+    - description: "用户名为空"
+      username: ""
+      password: "Abc@123456"
+      expected_status: 400
+      expected_msg_contains: ["用户名不能为空", "不能为空"]
+    - description: "密码为空"
+      username: "200001"
+      password: ""
+      expected_status: 400
+      expected_msg_contains: ["密码不能为空", "不能为空"]
+    - description: "密码大小写敏感"
+      username: "200001"
+      password: "abc@123456"
+      expected_status: 400
+      expected_msg_contains: ["密码错误", "密码格式错误"]
+
+  # 并发测试（单独处理，不在 YAML 中）
+  # 错误信息一致性测试（单独处理）

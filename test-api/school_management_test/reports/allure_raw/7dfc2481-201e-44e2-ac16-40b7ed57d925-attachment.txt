@@ -1,0 +1,2 @@
+状态码: 200
+响应: {"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0OCIsInVzZXJuYW1lIjoiMjAwMDAxIiwicm9sZSI6MCwiaWF0IjoxNzc2NDI0ODk0LCJleHAiOjE3NzY1MTEyOTR9.B0CtMkxFuZoDbqktkdh6-TW9UjLV1yHG1zjxF2cLkOE","userId":48,"username":"200001","role":0}

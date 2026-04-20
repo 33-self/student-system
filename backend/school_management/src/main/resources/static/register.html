@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - 学校管理系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 400px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .link a:hover {
+            text-decoration: underline;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .message.error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+        .message.success {
+            background: #efe;
+            color: #3c3;
+            border: 1px solid #cfc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>用户注册</h2>
+        <div id="message" class="message"></div>
+        <form id="registerForm">
+            <div class="form-group">
+                <label>工号 <span style="color: #999; font-size: 12px;">（6-12位数字）</span></label>
+                <input type="text" id="username" required placeholder="请输入工号，如：20240001" maxlength="12">
+            </div>
+            <div class="form-group">
+                <label>密码 <span style="color: #999; font-size: 12px;">（8-20位，必须包含大小写字母、数字、特殊符号）</span></label>
+                <input type="password" id="password" required placeholder="请输入密码" maxlength="20">
+                <div id="passwordHint" style="font-size: 12px; color: #999; margin-top: 5px; display: none;">
+                    <strong>密码要求：</strong><br>
+                    ✓ 长度8-20位，不能包含空格<br>
+                    ✓ 必须同时包含以下四类字符：<br>
+                    &nbsp;&nbsp;数字(0-9)、大写字母(A-Z)、小写字母(a-z)、特殊符号(!@#$%等)
+                </div>
+            </div>
+            <button type="submit">注册</button>
+        </form>
+        <div class="link">
+            <a href="login.html">已有账号？去登录</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('password').addEventListener('focus', () => {
+            document.getElementById('passwordHint').style.display = 'block';
+        });
+
+        document.getElementById('password').addEventListener('blur', () => {
+            document.getElementById('passwordHint').style.display = 'none';
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (!/^[0-9]{6,12}$/.test(username)) {
+                showMessage('工号格式错误：必须是6-12位纯数字', 'error');
+                return;
+            }
+
+            if (password.length < 8 || password.length > 20) {
+                showMessage('密码长度必须为8-20位', 'error');
+                return;
+            }
+
+            if (password.includes(' ')) {
+                showMessage('密码不能包含空格', 'error');
+                return;
+            }
+
+            if (!/[0-9]/.test(password) || !/[A-Z]/.test(password) ||
+                !/[a-z]/.test(password) || !/[^a-zA-Z0-9]/.test(password)) {
+                showMessage('密码必须包含：数字、大写字母、小写字母、特殊符号', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage('注册成功，正在跳转到登录页面...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 1500);
+                } else {
+                    showMessage(data.error || '注册失败', 'error');
+                }
+            } catch (error) {
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        });
+
+        function showMessage(text, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.textContent = text;
+            msgDiv.className = 'message ' + type;
+            msgDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

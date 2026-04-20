@@ -1,0 +1,45 @@
+# 基本运行
+pytest
+
+# 指定测试文件
+pytest test_auth.py
+
+# 显示详细信息（-v）
+pytest test_auth.py -v
+
+# 运行标记为 p0 的用例
+pytest -m p0
+
+# 运行 p0 和 p1
+pytest -m "p0 or p1"
+
+# 排除 p2 用例
+pytest -m "not p2"
+
+# 结合文件
+pytest test_auth.py -m p0 -v
+
+# 1. 生成 Allure 原始数据
+pytest test_auth.py --alluredir=reports/allure_raw
+
+# 2. 生成并打开 HTML 报告（需要已安装 allure 命令行工具）
+allure serve reports/allure_raw
+allure serve D:\papercode\school_management_test\allure-results
+
+# 3. 或者先生成静态报告，再打开
+allure generate reports/allure_raw -o reports/allure_report --clean
+allure open reports/allure_report
+
+四、并发执行（加快速度）
+
+# 使用 pytest-xdist 插件，-n 指定并行进程数（例如 4 个）
+pytest test_auth.py -n 4
+
+# 自动检测 CPU 核心数
+pytest test_auth.py -n auto
+
+# 并发 + HTML 报告
+pytest test_auth.py -n 4 --html=reports/report.html --self-contained-html
+
+# 并发 + Allure 数据（注意：并发时 Allure 步骤可能乱序，但最终报告正常）
+pytest test_auth.py -n 4 --alluredir=reports/allure_raw
