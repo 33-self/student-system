@@ -52,7 +52,7 @@ jobs:
         run: |
           cd backend/school_management
           nohup ./mvnw spring-boot:run > spring.log 2>&1 &
-          echo "Waiting 60 seconds for backend to start..."
+          echo "Waiting 60 seconds for backend to start on port 8081..."
           sleep 60
 
       - name: Set up Python
